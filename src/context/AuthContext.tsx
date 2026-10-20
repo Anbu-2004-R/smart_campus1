@@ -20,13 +20,13 @@ const AUTH_STORAGE_KEY = 'smart_campus_auth_user_id';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUserId, setCurrentUserId] = useState<string>(() => {
-    return localStorage.getItem(AUTH_STORAGE_KEY) || 'usr-admin-1';
+    return localStorage.getItem(AUTH_STORAGE_KEY) || 'unauthenticated';
   });
 
   const currentUser =
     currentUserId === 'unauthenticated'
       ? null
-      : INITIAL_USERS.find((u) => u.id === currentUserId) || INITIAL_USERS[0];
+      : INITIAL_USERS.find((u) => u.id === currentUserId) || null;
 
   const currentRole: UserRole = currentUser ? currentUser.role : 'STUDENT';
 

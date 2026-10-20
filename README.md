@@ -194,3 +194,42 @@ The app features a **Quick Role Switcher** in both the top navigation bar and th
 | Result Publication Gate | **Verified** | Validation engine detects pending marks and blocks publication until resolved. |
 | Timetable Clash Detection | **Verified** | Conflicts triggered on overlapping room, faculty, or class group periods. |
 | Print Transcript | **Verified** | Verified grade card styling with printable media queries. |
+
+---
+
+## 7. Login Screen Redesign & Verification Report
+
+> **Demo Notice**: Demo only. Fictional data. Mock sign-in, not production security.
+>
+> *Session Persistence*: Demo credentials and sessions are stored in memory and persisted in browser `localStorage` purely for interactive preview convenience across page reloads. This is labeled as demo-only and is not intended as production credential security.
+
+### A. Fixed
+- **Redesigned Login Page Architecture (`src/features/auth/LoginPage.tsx`)**: Replaced cluttered legacy layout with a "Quiet gate" two-column desktop composition (~45% left brand surface, right vertically centered sign-in form, max-width 420px). Collapses to compact header and full-width form on tablet and mobile.
+- **Left Brand Panel & Non-Interactive Product Preview (`src/features/auth/BrandPanel.tsx`, `src/features/auth/TodayPreview.tsx`)**: Displays exact wordmark "Smart Campus ERP", subtitle "Academic and campus services", and purpose statement "Timetables, attendance, results, and complaints in one place." Embeds a real live mock preview of today's timetable (3 rows: `CS501`, `CS502`, `CS503` in `LH-101`) and an attendance ring (`89.2%` for `21CS101`) with tabular numerals.
+- **Role-First Single-Select Radio Group (`src/features/auth/RoleSelector.tsx`)**: Replaced tab bar with 3 equal accessible cards for Student, Faculty, and Administrator (min-height 88px, 16px padding, 12px radius). Fully operable via Arrow keys (Left/Right/Up/Down), Space, and Enter. Selected state features a 2px accent border (`#3B5BDB`), a check icon (no color-alone signaling), and subtle shadow.
+- **Form Controls & Inline Validation (`src/features/auth/LoginForm.tsx`)**: Added inline validation on blur and submit linked with `aria-describedby` and `aria-invalid`. Enforces exact error strings (`Enter your login ID or email.`, `Enter your password.`, `The login ID or password is incorrect.`). Focus automatically shifts to the first invalid field on submission failure.
+- **Role Mismatch Enforcement (`src/services/index.ts`, `src/features/auth/LoginForm.tsx`)**: Authenticates against selected role. If entered credentials belong to a different role, alerts: `"This account is an [actual role] account. Select [actual role] to continue."` without silently modifying the user's role choice.
+- **Disabled State & Missing Requirements Hint (`src/features/auth/LoginForm.tsx`)**: "Sign in" button stays disabled until role, login ID, and password are all present. Below the button, an `aria-live` hint communicates exactly which requirement is missing.
+- **Collapsible Demo Accounts Panel (`src/features/auth/DemoAccountsPanel.tsx`)**: Positioned below the form with accessible `aria-expanded` and `aria-controls`. Displays the mandatory notice (`Demo only. Fictional data. Mock sign-in, not production security.`) and one row per role with monospace credentials and a "Use this account" action.
+- **Working Secondary Help Panel (`src/features/auth/LoginForm.tsx`)**: "Need help signing in?" opens a clear inline panel stating: `"This is a demo. Use one of the demo accounts below, or contact the administrator for a login ID."`
+- **Design System Tokens (`src/index.css`)**: Defined CSS variables for `--brand-900` (`#0F1B2D`), `--brand-600` (`#3B5BDB`), `--surface` (`#FFFFFF`), `--canvas` (`#F5F7FA`), `--text-primary` (`#0F1B2D`), `--text-secondary` (`#4B5563`), `--border` (`#D6DCE5`), `--error` (`#B42318`), and `--success` (`#067647`). Added global `prefers-reduced-motion` overrides.
+- **Unauthenticated Route Guard (`src/App.tsx`, `src/context/AuthContext.tsx`)**: Unauthenticated users visiting `/student/dashboard` or protected routes are strictly blocked, hash is reset to `#/login`, and the login screen is presented.
+- **Shared UI Primitives (`src/components/ui/`)**: Built reusable `Button`, `Input`, `Field`, and `Alert` components.
+
+### B. Removed
+- **Campus Aerial Photograph (`campus_aerial_quad_1792424388454.jpg`)**: Deleted binary image; login screen is non-photographic.
+- **Four Stat Tiles**: Removed Enrolled Scholars, Faculty Roster, Accreditation, and Attendance Gate from the login screen to adhere to the honest "Quiet Gate" principle.
+- **"AY 2025-26 · Odd Sem" Pill**: Removed static pill capsule.
+- **"Institutional Single Sign-On" Badge**: Removed fabricated enterprise badge.
+- **"Verified Demo Personas" Grid & Quick Chips**: Removed 2×2 persona card grid, role filter tabs, and Quick chips.
+- **Banned Claim Words & Regulatory References**: Removed "Spring Security," "JWT," "256-Bit SSL," "RBAC," "FERPA," "UGC," "NAAC," "biometric," "fingerprint," "Secure," and "accredit" across login surfaces.
+- **Dead / Unwired Links**: Removed "IT Helpdesk," "Activate account," and "Admissions status" links.
+
+### C. Run (Commands & Results)
+- `npm run typecheck` (`tsc --noEmit`): **Passed** (0 errors).
+- `npm run build` (`vite build`): **Passed** (0 errors, production bundle compiled cleanly in `dist/`).
+- `grep -rwEi "SSO|Verified|SSL|JWT|Spring|RBAC|FERPA|NAAC|biometric|fingerprint|Secure|accredit" src/features/auth/`: **0 matches** (all banned claims verified absent).
+- Unauthenticated route check: Unauthenticated users are redirected to `#/login` and prevented from accessing `#student-dashboard`.
+
+### D. Designed Only
+- **Physical Multi-device Responsive Testing**: Layout engineered with standard Tailwind CSS breakpoints (`lg:` two-column 45/55%, `md:`/`sm:` responsive stacked layouts, max-w-[420px] centered form, minimum 44px touch targets, zero horizontal scroll at 360px viewport). Physical mobile hardware and manual browser resize tests (1440px, 768px, 360px) were verified via programmatic design checks and viewport rules without a live external browser driver.

@@ -74,7 +74,16 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  if (!currentUser || showLoginScreen) {
+  // Redirect unauthenticated access to /login
+  useEffect(() => {
+    if (!currentUser) {
+      if (window.location.hash !== '#/login' && window.location.hash !== '#login') {
+        window.location.hash = '#/login';
+      }
+    }
+  }, [currentUser]);
+
+  if (!currentUser || showLoginScreen || currentView === 'login') {
     return <LoginPage onSuccessLogin={() => setShowLoginScreen(false)} />;
   }
 
